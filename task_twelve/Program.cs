@@ -8,22 +8,41 @@ namespace task_twelve
 {
     class Program
     {
-        static int count1 = 0, count2 = 0;
+        static int countRear1 = 0, countCompare2 = 0, countCompare1 = 0, countRear2 = 0;
 
         static void Main(string[] args)
         {
             Console.WriteLine("Сортировка слиянием");
             Console.Write("Введите элементы массива: ");
-            var s = Console.ReadLine().Split(new[] { " ", ",", ";" }, StringSplitOptions.RemoveEmptyEntries);
-            int[] array = new int[s.Length];
-            for (int i = 0; i < s.Length; i++)
+            string[] arr1 = new string[1];
+            try
+            { arr1 = Console.ReadLine().Split(new[] { " ", ",", ";" }, StringSplitOptions.RemoveEmptyEntries); }
+            catch (FormatException) { Console.WriteLine("Ошибка при вводе!"); }
+            int[] array1 = new int[arr1.Length];
+            int[] array2 = new int[arr1.Length];
+            for (int i = 0; i < arr1.Length; i++)
             {
-                array[i] = Convert.ToInt32(s[i]);
+                array1[i] = Convert.ToInt32(arr1[i]);
+                array2[i] = Convert.ToInt32(arr1[i]);
             }
+            Console.WriteLine("Неотсортированный массив.");
+            Console.WriteLine("Упорядоченный массив 1: {0}", string.Join(", ", MergeSort(array1)));
+            Console.WriteLine("Упорядоченный массив 2: {0}", string.Join(", ", BucketSort(array2)));
+            Console.WriteLine($"Количество перестановок:\nдля метода слияния: сравнения - {countCompare1}, перестановки - {countRear1}\nдля блочного метода: сравнения - {countCompare2}, перестановки - {countRear2}.");
 
-            Console.WriteLine("Упорядоченный массив: {0}", string.Join(", ", MergeSort(array)));
-            Console.WriteLine("Упорядоченный массив: {0}", string.Join(", ", BucketSort(array)));
-            Console.WriteLine($"Количество перестановок: для метода слияния - {count1}, для блочного метода - {count2}.");
+            countRear1 = 0; countCompare2 = 0; countCompare1 = 0; countRear2 = 0;
+            Array.Sort(array1); Array.Sort(array2);
+            Console.WriteLine("\nОтсортированный массив по возрастанию.");
+            Console.WriteLine("Упорядоченный массив 1: {0}", string.Join(", ", MergeSort(array1)));
+            Console.WriteLine("Упорядоченный массив 2: {0}", string.Join(", ", BucketSort(array2)));
+            Console.WriteLine($"Количество перестановок:\nдля метода слияния: сравнения - {countCompare1}, перестановки - {countRear1}\nдля блочного метода: сравнения - {countCompare2}, перестановки - {countRear2}.");
+
+            countRear1 = 0; countCompare2 = 0; countCompare1 = 0; countRear2 = 0;
+            Console.WriteLine("\nОтсортированный массив по убыванию.");
+            Array.Reverse(array1); Array.Reverse(array2);
+            Console.WriteLine("Упорядоченный массив 1: {0}", string.Join(", ", MergeSort(array1)));
+            Console.WriteLine("Упорядоченный массив 2: {0}", string.Join(", ", BucketSort(array2)));
+            Console.WriteLine($"Количество перестановок:\nдля метода слияния: сравнения - {countCompare1}, перестановки - {countRear1}\nдля блочного метода: сравнения - {countCompare2}, перестановки - {countRear2}.");
 
             Console.ReadLine();
         }
@@ -43,13 +62,13 @@ namespace task_twelve
                 {
                     tempArray[index] = array[left];
                     left++;
-                    count1++;
+                    countCompare1++;
                 }
                 else
                 {
                     tempArray[index] = array[right];
                     right++;
-                    count1++;
+                    countCompare1++;
                 }
 
                 index++;
@@ -59,20 +78,20 @@ namespace task_twelve
             {
                 tempArray[index] = array[i];
                 index++;
-                count1++;
+                countRear1++;
             }
 
             for (int i = right; i <= highIndex; i++)
             {
                 tempArray[index] = array[i];
                 index++;
-                count1++;
+                countRear1++;
             }
 
             for (int i = 0; i < tempArray.Length; i++)
             {
                 array[lowIndex + i] = tempArray[i];
-                count1++;
+                countRear1++;
             }
         }
 
@@ -86,7 +105,6 @@ namespace task_twelve
                 MergeSort(array, middleIndex + 1, highIndex);
                 Merge(array, lowIndex, middleIndex, highIndex);
             }
-
             return array;
         }
 
@@ -108,10 +126,16 @@ namespace task_twelve
             for (int i = 1; i < items.Length; i++)
             {
                 if (items[i] > maxValue)
+                {
+                    countRear2++;
                     maxValue = items[i];
+                }
 
                 if (items[i] < minValue)
+                {
+                    countRear2++;
                     minValue = items[i];
+                }
             }
 
             // Создание временного массива "карманов" в количестве,
@@ -133,6 +157,8 @@ namespace task_twelve
             for (int i = 0; i < items.Length; i++)
             {
                 bucket[items[i] - minValue].Add(items[i]);
+                countCompare2++;
+                countRear2++;
             }
 
             // Восстановление элементов в исходный массив из карманов в порядке возрастания значений
@@ -145,7 +171,7 @@ namespace task_twelve
                     {
                         items[position] = bucket[i][j];
                         position++;
-                        count2++;
+                        countCompare2++;
                     }
                 }
             }
